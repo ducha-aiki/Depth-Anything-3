@@ -40,20 +40,32 @@ class ModelInference:
         """Initialize the model inference handler."""
         self.model = None
 
-    def initialize_model(self, device: str = "cuda") -> None:
+    def initialize_model(self, device: str = "cuda", model_dir: str = None) -> None:
         """
         Initialize the DepthAnything3 model.
 
         Args:
             device: Device to load the model on
+            model_dir: Path to the model directory (if provided, overrides current model)
         """
-        if self.model is None:
-            # Get model directory from environment variable or use default
-            model_dir = os.environ.get(
-                "DA3_MODEL_DIR", "/dev/shm/da3_models/DA3HF-VITG-METRIC_VITL"
-            )
+        # If model_dir is provided and different from current, reload model
+        if model_dir and (self.model is None or hasattr(self, '_current_model_dir') and self._current_model_dir != model_dir):
+            if self.model is not None:
+                print(f"Switching model from {self._current_model_dir} to {model_dir}")
+                del self.model
+                torch.cuda.empty_cache() if torch.cuda.is_available() else None
             self.model = DepthAnything3.from_pretrained(model_dir)
             self.model = self.model.to(device)
+            self._current_model_dir = model_dir
+        elif self.model is None:
+            # Get model directory from environment variable or use default
+            if model_dir is None:
+                model_dir = os.environ.get(
+                    "DA3_MODEL_DIR", "depth-anything/DA3NESTED-GIANT-LARGE"
+                )
+            self.model = DepthAnything3.from_pretrained(model_dir)
+            self.model = self.model.to(device)
+            self._current_model_dir = model_dir
         else:
             self.model = self.model.to(device)
 
@@ -72,6 +84,7 @@ class ModelInference:
         infer_gs: bool = False,
         gs_trj_mode: str = "extend",
         gs_video_quality: str = "high",
+        model_dir: str = None,
     ) -> Tuple[Any, Dict[int, Dict[str, Any]]]:
         """
         Run DepthAnything3 model inference on images.
@@ -87,18 +100,21 @@ class ModelInference:
             selected_first_frame: Selected first frame filename
             save_percentage: Percentage of points to save (0-100)
             infer_gs: Whether to infer 3D Gaussian Splatting
+            model_dir: Path to the model directory
 
         Returns:
             Tuple of (prediction, processed_data)
         """
         print(f"Processing images from {target_dir}")
+        if model_dir:
+            print(f"Using model: {model_dir}")
 
         # Device check
         device = "cuda" if torch.cuda.is_available() else "cpu"
         device = torch.device(device)
 
         # Initialize model if needed
-        self.initialize_model(device)
+        self.initialize_model(device, model_dir)
 
         # Get image paths
         print("Loading images...")

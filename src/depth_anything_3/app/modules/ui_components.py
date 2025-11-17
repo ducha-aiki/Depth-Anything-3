@@ -199,14 +199,24 @@ class UIComponents:
             measure_text,
         )
 
-    def create_inference_control_section(self) -> Tuple[gr.Dropdown, gr.Checkbox]:
+    def create_inference_control_section(self) -> Tuple[gr.Radio, gr.Dropdown, gr.Checkbox]:
         """
         Create the inference control section (before inference).
 
         Returns:
-            Tuple of (process_res_method_dropdown, infer_gs)
+            Tuple of (model_radio, process_res_method_dropdown, infer_gs)
         """
         with gr.Row():
+            model_radio = gr.Radio(
+                choices=[
+                    "depth-anything/DA3NESTED-GIANT-LARGE",
+                    "depth-anything/DA3-BASE",
+                ],
+                value="depth-anything/DA3NESTED-GIANT-LARGE",
+                label="Model Selection",
+                info="Choose the depth model to use",
+                scale=1,
+            )
             process_res_method_dropdown = gr.Dropdown(
                 choices=["high_res", "low_res"],
                 value="low_res",
@@ -225,7 +235,7 @@ class UIComponents:
                 scale=1,
             )
 
-        return (process_res_method_dropdown, infer_gs)
+        return (model_radio, process_res_method_dropdown, infer_gs)
 
     def create_display_control_section(
         self,

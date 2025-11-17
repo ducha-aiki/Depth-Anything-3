@@ -623,7 +623,7 @@ def backend(
 
 @app.command()
 def gradio(
-    model_dir: str = typer.Option(DEFAULT_MODEL,help="Model directory path"),
+   # model_dir: str = typer.Option(DEFAULT_MODEL,help="Model directory path"),
     workspace_dir: str = typer.Option(DEFAULT_GRADIO_DIR,help="Workspace directory path"),
     gallery_dir: str = typer.Option(DEFAULT_GALLERY_DIR,help="Gallery directory path"),
     host: str = typer.Option("127.0.0.1", help="Host address to bind to"),
@@ -646,7 +646,7 @@ def gradio(
     os.makedirs(gallery_dir, exist_ok=True)
 
     typer.echo("Launching Depth Anything 3 Gradio application...")
-    typer.echo(f"Model directory: {model_dir}")
+   # typer.echo(f"Model directory: {model_dir}")
     typer.echo(f"Workspace directory: {workspace_dir}")
     typer.echo(f"Gallery directory: {gallery_dir}")
     typer.echo(f"Host: {host}")
@@ -665,7 +665,7 @@ def gradio(
     try:
         # Initialize and launch application
         app = DepthAnything3App(
-            model_dir=model_dir, workspace_dir=workspace_dir, gallery_dir=gallery_dir
+             workspace_dir=workspace_dir, gallery_dir=gallery_dir
         )
 
         # Pre-cache examples if requested

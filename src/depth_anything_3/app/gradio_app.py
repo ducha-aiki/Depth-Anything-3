@@ -37,22 +37,18 @@ class DepthAnything3App:
     Main application class for Depth Anything 3 Gradio app.
     """
 
-    def __init__(self, model_dir: str = None, workspace_dir: str = None, gallery_dir: str = None):
+    def __init__(self, workspace_dir: str = None, gallery_dir: str = None):
         """
         Initialize the application.
 
         Args:
-            model_dir: Path to the model directory
             workspace_dir: Path to the workspace directory
             gallery_dir: Path to the gallery directory
         """
-        self.model_dir = model_dir
         self.workspace_dir = workspace_dir
         self.gallery_dir = gallery_dir
 
         # Set environment variables for directories
-        if self.model_dir:
-            os.environ["DA3_MODEL_DIR"] = self.model_dir
         if self.workspace_dir:
             os.environ["DA3_WORKSPACE_DIR"] = self.workspace_dir
         if self.gallery_dir:
@@ -225,7 +221,7 @@ class DepthAnything3App:
                                 gs_video, gs_info = self.ui_components.create_nvs_video()
 
                         # Inference control section (before inference)
-                        (process_res_method_dropdown, infer_gs) = (
+                        (model_radio, process_res_method_dropdown, infer_gs) = (
                             self.ui_components.create_inference_control_section()
                         )
 
@@ -276,6 +272,7 @@ class DepthAnything3App:
                 show_cam,
                 filter_black_bg,
                 filter_white_bg,
+                model_radio,
                 process_res_method_dropdown,
                 save_percentage,
                 submit_btn,
@@ -320,6 +317,7 @@ class DepthAnything3App:
         show_cam: gr.Checkbox,
         filter_black_bg: gr.Checkbox,
         filter_white_bg: gr.Checkbox,
+        model_radio: gr.Radio,
         process_res_method_dropdown: gr.Dropdown,
         save_percentage: gr.Slider,
         submit_btn: gr.Button,
@@ -380,6 +378,7 @@ class DepthAnything3App:
                 infer_gs,
                 gs_trj_mode,
                 gs_video_quality,
+                model_radio,
             ],
             outputs=[
                 reconstruction_output,
@@ -634,7 +633,7 @@ Examples:
   # Basic usage
   python gradio_app.py --help
   python gradio_app.py --host 0.0.0.0 --port 8080
-  python gradio_app.py --model-dir /path/to/model --workspace-dir /path/to/workspace
+  python gradio_app.py --workspace-dir /path/to/workspace
 
   # Cache examples at startup (all low-res)
   python gradio_app.py --cache-examples
@@ -655,11 +654,6 @@ Examples:
     )
 
     # Directory configuration
-    parser.add_argument(
-        "--model-dir",
-        default="depth-anything/DA3NESTED-GIANT-LARGE",
-        help="Path to the model directory (default: depth-anything/DA3NESTED-GIANT-LARGE)",
-    )
     parser.add_argument(
         "--workspace-dir",
         default="workspace/gradio",  # noqa: E501
@@ -696,7 +690,7 @@ Examples:
 
     # Initialize and launch the application
     app = DepthAnything3App(
-        model_dir=args.model_dir, workspace_dir=args.workspace_dir, gallery_dir=args.gallery_dir
+        workspace_dir=args.workspace_dir, gallery_dir=args.gallery_dir
     )
 
     # Prepare launch arguments
@@ -705,7 +699,6 @@ Examples:
     print("Starting Depth Anything 3 Gradio App...")
     print(f"Host: {args.host}")
     print(f"Port: {args.port}")
-    print(f"Model Directory: {args.model_dir}")
     print(f"Workspace Directory: {args.workspace_dir}")
     print(f"Gallery Directory: {args.gallery_dir}")
     print(f"Share: {args.share}")
